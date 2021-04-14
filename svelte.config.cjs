@@ -4,17 +4,17 @@ const pkg = require('./package.json');
 
 /** @type {import('@sveltejs/kit').Config} */
 module.exports = {
-	preprocess: sveltePreprocess(),
-	kit: {
-		adapter: node(),
-		target: '#svelte',
+  preprocess: sveltePreprocess(),
+  kit: {
+    adapter: node(),
+    target: '#svelte',
 
-		ssr: true,
+    ssr: true,
 
-		vite: {
-			ssr: {
-				noExternal: Object.keys(pkg.dependencies || {})
-			}
-		}
-	}
+    vite: {
+      ssr: {
+        noExternal: Object.keys(pkg.dependencies || {}),
+      },
+    },
+  },
 };
