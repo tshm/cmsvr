@@ -1,18 +1,28 @@
 <script lanst="ts">
 	export let path = 'unknown';
 	export let alt = 'unknown';
-	export let largeview = false;
+	export let viewfitmode = 'none';
 	$: src = `/contents${path}`;
-	// $: console.log({ src })
+	// $: console.log({ viewfitmode });
 </script>
 
-<img class="{largeview ? 'largeview' : ''}" {src} {alt} />
+<img class={viewfitmode} {src} {alt} />
 
 <style lang="scss">
 	img {
+		object-fit: contain;
+		overflow: hidden;
+	}
+	.none {
+		width: 100%;
+		height: 100%;
+	}
+	.horizontal-fit {
+		max-width: 100vw;
 		width: 100%;
 	}
-	.largeview {
-    width: 100%;
-  }
+	.vertical-fit {
+		max-height: 100vw;
+		height: 100%;
+	}
 </style>

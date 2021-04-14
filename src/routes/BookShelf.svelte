@@ -26,8 +26,10 @@
 	import BookStack from '$lib/BookStack.svelte';
 	import BookCover from '$lib/BookCover.svelte';
 	import Image from '$lib/Image.svelte';
+	import { view } from '$lib/store'
 	export let items: Entity[] = [];
 	$: console.log({ items });
+	view.set('Bookshelf')
 </script>
 
 <div class="shelf">
@@ -51,24 +53,29 @@
 </div>
 
 <style lang="scss">
+	$cardwidth: 10rem;
+	$cardheight: calc(1.7 * #{$cardwidth});
+
 	.shelf {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
-		grid-gap: 0.5rem;
+		grid-template-columns: repeat(auto-fill, minmax($cardwidth, 1fr));
+		grid-gap: 1rem;
 		justify-content: left;
 		align-items: left;
 		margin: auto;
 		padding: 1rem;
+		padding-top: 3.5rem;
+		height: auto !important;
 	}
 	.book {
 		display: flex;
 		align-items: center;
 		flex-direction: column;
-		width: 5rem;
-		height: 7rem;
+		width: $cardwidth;
+		height: $cardheight;
 		background: #fff;
 		box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
-		border-radius: 5px;
+		border-radius: 5%;
 		margin: auto;
 		overflow: hidden;
 	}

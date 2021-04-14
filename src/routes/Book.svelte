@@ -24,22 +24,50 @@
 
 <script lang="ts">
 	import Image from '$lib/Image.svelte';
+	import { Command, parseClick } from '$lib/ClickAreaHandler';
+	import { config, view, viewfitmode } from '$lib/store';
 
 	export let pagenum = 1;
 	export let pages: Page[];
 	$: page = pages[pagenum];
 
-	function handleClick(ev: any) {
-		console.info(ev);
-		if (pagenum === pages.length - 1) {
-			console.log('finished');
-			history.back();
-			return;
+	view.set('PageView');
+
+	function changeViewState() {
+		console.log('viewstatechange');
+		$viewfitmode = $viewfitmode === 'vertical-fit' ? 'horizontal-fit' : 'vertical-fit';
+	}
+
+	function handleClick(ev: MouseEvent) {
+		const elem = ev.currentTarget as HTMLElement;
+		const rect = {
+			origin: { x: elem.clientLeft, y: elem.clientTop },
+			size: { x: elem.clientWidth, y: elem.clientHeight }
+		};
+		const cmd = parseClick($config)(rect)({ x: ev.clientX, y: ev.clientY }, { pages, pagenum });
+		// console.info({ rect, ev, cmd, pagenum });
+		switch (cmd) {
+			case Command.NextPage:
+				pagenum++;
+				break;
+			case Command.PrevPage:
+				pagenum--;
+				break;
+			case Command.GoHome:
+				document.location.href = '/';
+				break;
+			case Command.Backup:
+				history.back();
+				break;
+			case Command.ViewState:
+				changeViewState();
+				break;
+			default:
+				console.log('unhandled command', cmd);
 		}
-		pagenum++;
 	}
 </script>
 
 <div on:click={handleClick}>
-	<Image largeview path={page.path} alt="test" />
+	<Image viewfitmode={$viewfitmode} path={page.path} alt={page.path} />
 </div>

@@ -70,6 +70,7 @@ export function getEntities(path: string = ''): Entity[] {
 }
 
 export const get: RequestHandler<any, Entity[]> = async ({ query }) => {
+	console.info('images.json called');
 	const path = query.get('path') ?? undefined;
 	const entities = getEntities(path);
 	if (entities) {

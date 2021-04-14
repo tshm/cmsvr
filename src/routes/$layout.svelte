@@ -1,9 +1,10 @@
 <script>
 	import '../app.scss';
+	import { view } from '$lib/store'
 </script>
 
 <main>
-	<nav>
+	<nav class={ $view === 'PageView' ? 'hidden' : ''}>
 		<h1>CMView</h1>
 		<ul>
 			<li>
@@ -22,6 +23,10 @@
 </main>
 
 <style lang="scss">
+	nav.hidden {
+		display: none;
+	}
+
 	.icon {
 		width: 1rem;
 		height: 1rem;

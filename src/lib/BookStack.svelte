@@ -9,6 +9,14 @@
 </script>
 
 <card class="thumbnail">
-	<Image path={book.cover.path} alt={bookshelf.name} />
+	<div>
+		<Image path={book.cover.path} alt={bookshelf.name} />
+	</div>
 </card>
 <span class="title">{bookshelf.name}</span>
+
+<style lang="scss">
+	div {
+		border: solid 2px yellow;
+	}
+</style>
