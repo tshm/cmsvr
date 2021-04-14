@@ -1,12 +1,11 @@
 <script lanst="ts">
-	export let path = 'unknown';
+	export let data = 'unknown';
 	export let alt = 'unknown';
 	export let viewfitmode = 'none';
-	$: src = `/contents${path}`;
 	// $: console.log({ viewfitmode });
 </script>
 
-<img class={viewfitmode} {src} {alt} />
+<img class={viewfitmode} src={data} {alt} />
 
 <style lang="scss">
 	img {

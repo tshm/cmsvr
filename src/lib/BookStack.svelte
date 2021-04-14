@@ -10,7 +10,7 @@
 
 <card class="thumbnail">
 	<div>
-		<Image path={book.cover.path} alt={bookshelf.name} />
+		<Image data={book.cover.data} alt={bookshelf.name} />
 	</div>
 </card>
 <span class="title">{bookshelf.name}</span>

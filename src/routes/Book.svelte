@@ -69,5 +69,5 @@
 </script>
 
 <div on:click={handleClick}>
-	<Image viewfitmode={$viewfitmode} path={page.path} alt={page.path} />
+	<Image viewfitmode={$viewfitmode} data={page.data} alt={page.path} />
 </div>

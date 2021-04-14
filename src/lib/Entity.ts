@@ -20,6 +20,7 @@ export type Book = Named & {
 /** Page for an image */
 export type Page = Named & {
 	type: 'page';
+	data: string;
 };
 
 export const isBookshelf = (item: Entity): item is Bookshelf => item.type === 'bookshelf';

@@ -7,6 +7,6 @@
 </script>
 
 <card class="thumbnail">
-	<Image path={book.cover.path} alt={book.name} />
+	<Image data={book.cover.data} alt={book.name} />
 </card>
 <span class="title">{book.name}</span>

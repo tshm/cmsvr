@@ -1,4 +1,4 @@
-import { lstatSync, readdirSync, Dirent } from 'fs';
+import { lstatSync, readFileSync, readdirSync, Dirent } from 'fs';
 import { join } from 'path';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { Entity, Bookshelf, Book, Page } from '$lib/Entity';
@@ -40,7 +40,10 @@ const toBook = (dir: string) => (ent: Dirent): Book | null => {
 
 const toPage = (dir: string) => (dirent: Dirent): Page | null => {
 	if (!isImage(dirent)) return null;
-	return { type: 'page', name: dirent.name, path: join('/', dir, dirent.name) };
+	const base64 = readFileSync(join(baseDir, dir, dirent.name)).toString('base64');
+	const ext = dirent.name.match(/jpe?g/) ? 'jpeg' : dirent.name.match(/png/) ? 'png' : 'jpg';
+	const data = `data:image/${ext};base64,${base64}`;
+	return { type: 'page', name: dirent.name, path: join('/', dir, dirent.name), data };
 };
 
 const toBookshelf = (dir: string) => (dirent: Dirent): Bookshelf | null => {

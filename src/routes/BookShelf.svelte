@@ -28,7 +28,7 @@
 	import Image from '$lib/Image.svelte';
 	import { view } from '$lib/store'
 	export let items: Entity[] = [];
-	$: console.log({ items });
+	$: console.log({ items: items.length });
 	view.set('Bookshelf')
 </script>
 
@@ -45,7 +45,7 @@
 				</a>
 			{:else}
 				<a href={`/Book?path=${item.path}`}>
-					<Image path={item.path} />
+					<Image data={item.data} />
 				</a>
 			{/if}
 		</div>
