@@ -1,13 +1,15 @@
-import { lstatSync, readFileSync, readdirSync, Dirent } from 'fs';
+import { lstatSync, readdirSync, Dirent } from 'fs';
 import { join } from 'path';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { Entity, Bookshelf, Book, Page } from '$lib/Entity';
-const baseDir = 'contents';
+import sharp from 'sharp';
 const supportedImageExtension = ['jpg', 'jpeg', 'png'];
 const supportedArchiveExtension = ['cbr', 'cbz', 'zip', 'rar'];
 
+export const baseDir = (): string => 'contents';
+
 const ls = (dir: string) =>
-  readdirSync(join(baseDir, dir), { withFileTypes: true });
+  readdirSync(join(baseDir(), dir), { withFileTypes: true });
 
 const extensionRegex = new RegExp('.*\\.([^.]+)');
 const extractExtension = (filename: string) =>
@@ -25,7 +27,7 @@ const isImageArchive = (ent: Dirent) => {
   return supportedArchiveExtension.includes(ext);
 };
 
-const toBook = (dir: string) => (ent: Dirent): Book | null => {
+const toBook = (dir: string) => async (ent: Dirent): Promise<Book | null> => {
   if (ent.isFile() && !isImageArchive(ent)) return null;
   if (!ent.isDirectory()) return null;
   const path = join(dir, ent.name);
@@ -36,21 +38,24 @@ const toBook = (dir: string) => (ent: Dirent): Book | null => {
     type: 'book',
     name: ent.name,
     path,
-    cover: toPage(path)(file),
+    cover: await toPage(path)(file),
   };
 };
 
-const toPage = (dir: string) => (dirent: Dirent): Page | null => {
+const toPage = (dir: string) => async (
+  dirent: Dirent,
+  resolution = 200,
+): Promise<Page | null> => {
   if (!isImage(dirent)) return null;
-  const base64 = readFileSync(join(baseDir, dir, dirent.name)).toString(
-    'base64',
-  );
+  const bin = await sharp(join(baseDir(), dir, dirent.name))
+    .resize(resolution)
+    .toBuffer();
   const ext = dirent.name.match(/jpe?g/)
     ? 'jpeg'
     : dirent.name.match(/png/)
     ? 'png'
     : 'jpg';
-  const data = `data:image/${ext};base64,${base64}`;
+  const data = `data:image/${ext};base64,${bin.toString('base64')}`;
   return {
     type: 'page',
     name: dirent.name,
@@ -59,11 +64,13 @@ const toPage = (dir: string) => (dirent: Dirent): Page | null => {
   };
 };
 
-const toBookshelf = (dir: string) => (dirent: Dirent): Bookshelf | null => {
+const toBookshelf = (dir: string) => async (
+  dirent: Dirent,
+): Promise<Bookshelf | null> => {
   if (!dirent.isDirectory()) return null;
-  const path = `${dir}/${dirent.name}`;
+  const path = join(dir, dirent.name);
   const dirents = ls(path);
-  const books = dirents.map(toBook(path)).filter((i) => i);
+  const books = (await Promise.all(dirents.map(toBook(path)))).filter((i) => i);
   if (books.length === 0) return null;
   return {
     type: 'bookshelf',
@@ -73,22 +80,33 @@ const toBookshelf = (dir: string) => (dirent: Dirent): Bookshelf | null => {
   };
 };
 
-const toEntity = (dir: string) => (dirent: Dirent): Entity | null =>
-  toPage(dir)(dirent) ?? toBook(dir)(dirent) ?? toBookshelf(dir)(dirent);
+const toEntity = (dir: string, resolution: number) => async (
+  dirent: Dirent,
+): Promise<Entity | null> =>
+  (await toPage(dir)(dirent, resolution)) ??
+  (await toBook(dir)(dirent)) ??
+  (await toBookshelf(dir)(dirent));
 
-export function getEntities(path = ''): Entity[] {
-  if (lstatSync(join(baseDir, path)).isFile()) {
+export async function getEntities(
+  path = '',
+  resolution = 200,
+): Promise<Entity[]> {
+  if (lstatSync(join(baseDir(), path)).isFile()) {
     path = `${path}/..`;
   }
   const dirents = ls(path);
-  const items = dirents.map(toEntity(path)).filter((ent) => ent);
+  const items = (
+    await Promise.all(dirents.map(toEntity(path, resolution)))
+  ).filter((ent) => ent);
   return items;
 }
 
 export const get: RequestHandler<unknown, Entity[]> = async ({ query }) => {
-  console.info('images.json called');
+  console.info('images.json called', { query });
   const path = query.get('path') ?? undefined;
-  const entities = getEntities(path);
+  const resolution = query.get('resolution') ?? '500';
+  const entities = await getEntities(path, +resolution);
+  console.log({ len: entities.length, t: entities.map((i) => i.type) });
   if (entities) {
     return {
       body: {

@@ -2,10 +2,13 @@
   import type { Page } from '$lib/Entity';
   import type { Load } from '@sveltejs/kit';
   import { isPage } from '$lib/Entity';
+  import { resolution } from '$lib/DeviceResolution';
 
   export const load: Load = async ({ page, fetch }) => {
     const path = page.query.get('path') ?? '';
-    const res = await fetch(`/images.json?path=${path}`);
+    const res = await fetch(
+      `/images.json?path=${path}&resolution=${resolution}`,
+    );
     const pages = (await res.json()).entities.filter(isPage) as Page[];
     const pagenum = pages.findIndex((i) => i.path === path);
     console.info({ path, pages, pagenum });

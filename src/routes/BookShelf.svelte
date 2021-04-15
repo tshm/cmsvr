@@ -2,11 +2,14 @@
   import type { Entity } from '$lib/Entity';
   import type { Load } from '@sveltejs/kit';
   import { isBookshelf, isBook } from '$lib/Entity';
+  import { resolution } from '$lib/DeviceResolution';
 
   export const load: Load = async ({ page, fetch }) => {
     const path = page.query.get('path') ?? '';
     // console.log('image list called', { fetch, path });
-    const res = await fetch(`/images.json?path=${path}`);
+    const res = await fetch(
+      `/images.json?path=${path}&resolution=${resolution}`,
+    );
     const items = (await res.json()).entities as Entity[];
     // console.log('load', { items });
 
@@ -56,7 +59,7 @@
     --cardwidth: 10rem;
     --cardheight: calc(1.7 * var(--cardwidth));
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(--cardwidth, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(var(--cardwidth), 1fr));
     grid-gap: 1rem;
     justify-content: left;
     align-items: left;
@@ -69,7 +72,7 @@
     display: flex;
     align-items: center;
     flex-direction: column;
-    width: --cardwidth;
+    width: var(--cardwidth);
     height: var(--cardheight);
     background: #fff;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
