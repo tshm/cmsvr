@@ -48,13 +48,13 @@ const toPage = (dir: string) => async (
 ): Promise<Page | null> => {
   if (!isImage(dirent)) return null;
   const bin = await sharp(join(baseDir(), dir, dirent.name))
-    .resize(resolution)
+    .resize({ width: resolution, fastShrinkOnLoad: true, fit: 'contain' })
     .toBuffer();
   const ext = dirent.name.match(/jpe?g/)
     ? 'jpeg'
     : dirent.name.match(/png/)
-    ? 'png'
-    : 'jpg';
+      ? 'png'
+      : 'jpg';
   const data = `data:image/${ext};base64,${bin.toString('base64')}`;
   return {
     type: 'page',
@@ -106,7 +106,7 @@ export const get: RequestHandler<unknown, Entity[]> = async ({ query }) => {
   const path = query.get('path') ?? undefined;
   const resolution = query.get('resolution') ?? '500';
   const entities = await getEntities(path, +resolution);
-  console.log({ len: entities.length, t: entities.map((i) => i.type) });
+  console.log({ len: entities.length });
   if (entities) {
     return {
       body: {

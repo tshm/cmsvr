@@ -10,13 +10,8 @@
     </a>
     <ul>
       <li>
-        <a href="/BookShelf">
-          <img class="icon" src="home.svg" alt="home" />
-        </a>
-      </li>
-      <li>
         <a href="/Config">
-          <img class="icon" src="gear.svg" alt="gear" />
+          <span class="material-icons">settings</span>
         </a>
       </li>
     </ul>
@@ -31,10 +26,5 @@
 
   nav a {
     text-decoration: none;
-  }
-
-  .icon {
-    width: 1.5rem;
-    height: 1.5rem;
   }
 </style>

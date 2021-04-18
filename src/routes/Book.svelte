@@ -10,8 +10,9 @@
       `/images.json?path=${path}&resolution=${resolution}`,
     );
     const pages = (await res.json()).entities.filter(isPage) as Page[];
-    const pagenum = pages.findIndex((i) => i.path === path);
-    console.info({ path, pages, pagenum });
+    const pagenum = pages.findIndex((i) => i.path === path) ?? 0;
+    const bufsize_kb = (pages[0]?.data?.length ?? 0) / 1000;
+    console.info({ path, pages: pages?.length, pagenum, bufsize_kb });
 
     return res.ok
       ? {
@@ -76,11 +77,18 @@
         changeViewState();
         break;
       default:
-        console.log('unhandled command', cmd);
+        console.warn('unhandled command', cmd);
     }
   }
 </script>
 
-<div on:click={handleClick}>
+<div id="book" on:click={handleClick}>
   <Image viewfitmode={$viewfitmode} data={page.data} alt={page.path} />
 </div>
+
+<style lang="scss">
+  div {
+    display: flex;
+    align-items: center;
+  }
+</style>
