@@ -31,8 +31,10 @@ const toBook = (dir: string) => async (ent: Dirent): Promise<Book | null> => {
   if (ent.isFile() && !isImageArchive(ent)) return null;
   if (!ent.isDirectory()) return null;
   const path = join(dir, ent.name);
-  const file = ls(path).find(isImage);
-  const folderExist = ls(path).some((e) => e.isDirectory());
+  const subDirents = ls(path);
+  const file = subDirents.find(isImage);
+  const folderExist = subDirents.some((e) => e.isDirectory());
+  // console.log({ file, folderExist, path, book: !file || folderExist });
   if (!file || folderExist) return null;
   return {
     type: 'book',
@@ -53,8 +55,8 @@ const toPage = (dir: string) => async (
   const ext = dirent.name.match(/jpe?g/)
     ? 'jpeg'
     : dirent.name.match(/png/)
-      ? 'png'
-      : 'jpg';
+    ? 'png'
+    : 'jpg';
   const data = `data:image/${ext};base64,${bin.toString('base64')}`;
   return {
     type: 'page',
@@ -70,17 +72,24 @@ const toBookshelf = (dir: string) => async (
   if (!dirent.isDirectory()) return null;
   const path = join(dir, dirent.name);
   const dirents = ls(path);
-  const books = (await Promise.all(dirents.map(toBook(path)))).filter((i) => i);
-  if (books.length === 0) return null;
+  const items = (await Promise.all(dirents.map(toEntity(path)))).filter(
+    Boolean,
+  );
+  if (items.length === 0) return null;
+  const covers = items
+    .flatMap((i) => ('cover' in i ? i.cover : null))
+    .filter(Boolean);
+  if (!covers) return null;
   return {
     type: 'bookshelf',
     name: dirent.name,
     path,
-    books,
+    items,
+    cover: covers[0],
   };
 };
 
-const toEntity = (dir: string, resolution: number) => async (
+const toEntity = (dir: string, resolution = 200) => async (
   dirent: Dirent,
 ): Promise<Entity | null> =>
   (await toPage(dir)(dirent, resolution)) ??
@@ -97,7 +106,7 @@ export async function getEntities(
   const dirents = ls(path);
   const items = (
     await Promise.all(dirents.map(toEntity(path, resolution)))
-  ).filter((ent) => ent);
+  ).filter(Boolean);
   return items;
 }
 

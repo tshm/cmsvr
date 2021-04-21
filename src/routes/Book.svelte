@@ -14,17 +14,20 @@
     const bufsize_kb = (pages[0]?.data?.length ?? 0) / 1000;
     console.info({ path, pages: pages?.length, pagenum, bufsize_kb });
 
-    return res.ok
-      ? {
-          props: {
-            pages,
-            pagenum: pagenum < 0 ? 0 : pagenum,
-          },
-        }
-      : {
-          status: 400,
-          error: new Error(`Could not load ${page}`),
-        };
+    if (res.ok) {
+      return {
+        props: {
+          pages,
+          pagenum: pagenum < 0 ? 0 : pagenum,
+        },
+      };
+    }
+
+    console.error(`Could not load ${page}`);
+    return {
+      status: 400,
+      error: new Error(`Could not load ${page}`),
+    };
   };
 </script>
 
@@ -90,5 +93,6 @@
   div {
     display: flex;
     align-items: center;
+    justify-content: center;
   }
 </style>

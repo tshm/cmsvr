@@ -8,7 +8,8 @@ type Named = {
 /** collection of Books */
 export type Bookshelf = Named & {
   type: 'bookshelf';
-  books: Book[];
+  items: Entity[];
+  cover: Page;
 };
 
 /** collection of Pages */

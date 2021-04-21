@@ -5,14 +5,13 @@
   import CheckMark from './CheckMark.svelte';
 
   export let bookshelf: Bookshelf;
-  $: book = bookshelf.books[0];
-  $: console.log({ books: bookshelf.books.length });
+  $: console.log({ items: bookshelf.items.length });
 </script>
 
 <card class="thumbnail">
   <div>
-    <Image data={book.cover.data} alt={bookshelf.name} />
-    <CheckMark path={book.path} />
+    <Image data={bookshelf.cover.data} alt={bookshelf.name} />
+    <CheckMark path={bookshelf.path} />
   </div>
 </card>
 <span class="title">{bookshelf.name}</span>
