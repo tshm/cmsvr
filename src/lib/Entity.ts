@@ -15,13 +15,13 @@ export type Bookshelf = Named & {
 /** collection of Pages */
 export type Book = Named & {
   type: 'book';
+  pages: number;
   cover: Page;
 };
 
 /** Page for an image */
 export type Page = Named & {
   type: 'page';
-  data: string;
 };
 
 export const isBookshelf = (item: Entity): item is Bookshelf =>

@@ -1,33 +1,20 @@
 <script context="module" lang="ts">
-  import type { Page } from '$lib/Entity';
   import type { Load } from '@sveltejs/kit';
+  import type { Page } from '$lib/Entity';
   import { isPage } from '$lib/Entity';
-  import { resolution } from '$lib/DeviceResolution';
 
   export const load: Load = async ({ page, fetch }) => {
     const path = page.query.get('path') ?? '';
-    const res = await fetch(
-      `/images.json?path=${path}&resolution=${resolution}`,
-    );
+    const res = await fetch(`/images.json?path=${path}`);
     const pages = (await res.json()).entities.filter(isPage) as Page[];
     const pagenum = pages.findIndex((i) => i.path === path) ?? 0;
-    const bufsize_kb = (pages[0]?.data?.length ?? 0) / 1000;
-    console.info({ path, pages: pages?.length, pagenum, bufsize_kb });
+    console.info({ path, pages: pages?.length, pagenum });
 
     if (res.ok) {
-      return {
-        props: {
-          pages,
-          pagenum: pagenum < 0 ? 0 : pagenum,
-        },
-      };
+      return { props: { pages, pagenum: pagenum < 0 ? 0 : pagenum } };
     }
-
     console.error(`Could not load ${page}`);
-    return {
-      status: 400,
-      error: new Error(`Could not load ${page}`),
-    };
+    return { status: 400, error: new Error(`Could not load ${page}`) };
   };
 </script>
 
@@ -38,7 +25,9 @@
 
   export let pagenum = 1;
   export let pages: Page[];
+  $: console.log({ pagenum });
   $: page = pages[pagenum];
+  $: totalPages = pages.length;
 
   view.set('PageView');
 
@@ -58,7 +47,7 @@
       { x: ev.clientX, y: ev.clientY },
       { pages, pagenum },
     );
-    if (pagenum === pages.length - 1) {
+    if (pagenum === totalPages - 1) {
       console.log('mark book read');
       // setRead(book);
     }
@@ -86,13 +75,26 @@
 </script>
 
 <div id="book" on:click={handleClick}>
-  <Image viewfitmode={$viewfitmode} data={page.data} alt={page.path} />
+  <Image viewfitmode={$viewfitmode} path={page.path} alt={page.path} />
+</div>
+<div id="pagenum">{pagenum + 1} / {totalPages}</div>
+<div id="cache">
+  <Image path={pages[pagenum + 1]?.path} />
+  <Image path={pages[pagenum - 1]?.path} />
 </div>
 
 <style lang="scss">
-  div {
+  #cache {
+    visibility: collapse;
+  }
+  #book {
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+  #pagenum {
+    display: block;
+    color: rgba(0, 0, 0, 0.5);
+    margin-top: -2rem;
   }
 </style>

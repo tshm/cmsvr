@@ -11,7 +11,6 @@
       `/images.json?path=${path}&resolution=${resolution}`,
     );
     const items = (await res.json()).entities as Entity[];
-    // console.log('load', { items });
 
     return res.ok
       ? {
@@ -29,6 +28,7 @@
   import BookCover from '$lib/BookCover.svelte';
   import Image from '$lib/Image.svelte';
   import { view } from '$lib/store';
+
   export let items: Entity[] = [];
   $: console.log({ items: items.length });
   view.set('Bookshelf');
@@ -47,7 +47,7 @@
         </a>
       {:else}
         <a href={`/Book?path=${item.path}`}>
-          <Image data={item.data} />
+          <Image path={item.path} />
         </a>
       {/if}
     </div>
@@ -67,7 +67,12 @@
     padding: 1rem;
     padding-top: 3.5rem;
     height: auto !important;
+
+    a {
+      text-decoration: none;
+    }
   }
+
   .book {
     display: flex;
     align-items: center;

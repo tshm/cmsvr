@@ -1,11 +1,27 @@
-<script lanst="ts">
-  export let data = 'unknown';
+<script lang="ts">
+  import { resolution } from '$lib/DeviceResolution';
+  import { browser } from '$app/env';
+
+  export let path = '';
   export let alt = 'unknown';
   export let viewfitmode = 'none';
-  $: console.log({ viewfitmode });
+  $: console.log({ viewfitmode, path });
+  $: fetchImage = (async () => {
+    if (!browser || !path) return '';
+    console.log('fetching: ', path);
+    const response = await fetch(
+      `/imagedata.json?path=${path}&resolution=${resolution}`,
+    );
+    const body = await response.json();
+    return body?.data;
+  })();
 </script>
 
-<img class={viewfitmode} src={data} {alt} />
+{#await fetchImage}
+  <p>....</p>
+{:then data}
+  <img class={viewfitmode} src={data} {alt} />
+{/await}
 
 <style lang="scss">
   img {

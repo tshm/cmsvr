@@ -2,7 +2,6 @@ import { lstatSync, readdirSync, Dirent } from 'fs';
 import { join } from 'path';
 import type { RequestHandler } from '@sveltejs/kit';
 import type { Entity, Bookshelf, Book, Page } from '$lib/Entity';
-import sharp from 'sharp';
 const supportedImageExtension = ['jpg', 'jpeg', 'png'];
 const supportedArchiveExtension = ['cbr', 'cbz', 'zip', 'rar'];
 
@@ -32,37 +31,27 @@ const toBook = (dir: string) => async (ent: Dirent): Promise<Book | null> => {
   if (!ent.isDirectory()) return null;
   const path = join(dir, ent.name);
   const subDirents = ls(path);
-  const file = subDirents.find(isImage);
+  const files = subDirents.filter(isImage);
   const folderExist = subDirents.some((e) => e.isDirectory());
   // console.log({ file, folderExist, path, book: !file || folderExist });
-  if (!file || folderExist) return null;
+  if (files.length == 0 || folderExist) return null;
   return {
     type: 'book',
     name: ent.name,
+    pages: files.length,
     path,
-    cover: await toPage(path)(file),
+    cover: await toPage(path)(files[0]),
   };
 };
 
 const toPage = (dir: string) => async (
   dirent: Dirent,
-  resolution = 200,
 ): Promise<Page | null> => {
   if (!isImage(dirent)) return null;
-  const bin = await sharp(join(baseDir(), dir, dirent.name))
-    .resize({ width: resolution, fastShrinkOnLoad: true, fit: 'contain' })
-    .toBuffer();
-  const ext = dirent.name.match(/jpe?g/)
-    ? 'jpeg'
-    : dirent.name.match(/png/)
-    ? 'png'
-    : 'jpg';
-  const data = `data:image/${ext};base64,${bin.toString('base64')}`;
   return {
     type: 'page',
     name: dirent.name,
     path: join('/', dir, dirent.name),
-    data,
   };
 };
 
@@ -89,38 +78,30 @@ const toBookshelf = (dir: string) => async (
   };
 };
 
-const toEntity = (dir: string, resolution = 200) => async (
+const toEntity = (dir: string) => async (
   dirent: Dirent,
 ): Promise<Entity | null> =>
-  (await toPage(dir)(dirent, resolution)) ??
+  (await toPage(dir)(dirent)) ??
   (await toBook(dir)(dirent)) ??
   (await toBookshelf(dir)(dirent));
 
-export async function getEntities(
-  path = '',
-  resolution = 200,
-): Promise<Entity[]> {
+export async function getEntities(path = ''): Promise<Entity[]> {
   if (lstatSync(join(baseDir(), path)).isFile()) {
     path = `${path}/..`;
   }
   const dirents = ls(path);
-  const items = (
-    await Promise.all(dirents.map(toEntity(path, resolution)))
-  ).filter(Boolean);
+  const items = (await Promise.all(dirents.map(toEntity(path)))).filter(
+    Boolean,
+  );
   return items;
 }
 
 export const get: RequestHandler<unknown, Entity[]> = async ({ query }) => {
   console.info('images.json called', { query });
   const path = query.get('path') ?? undefined;
-  const resolution = query.get('resolution') ?? '500';
-  const entities = await getEntities(path, +resolution);
-  console.log({ len: entities.length });
+  const entities = await getEntities(path);
   if (entities) {
-    return {
-      body: {
-        entities,
-      },
-    };
+    console.log({ len: entities.length });
+    return { body: { entities } };
   }
 };
