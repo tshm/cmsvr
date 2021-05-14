@@ -58,14 +58,15 @@
   .shelf {
     --cardwidth: 10rem;
     --cardheight: calc(1.7 * var(--cardwidth));
+    --gridgap: calc(3 * var(--gap));
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(var(--cardwidth), 1fr));
-    grid-gap: 1rem;
+    grid-gap: var(--gridgap);
     justify-content: left;
     align-items: left;
     margin: auto;
-    padding: 1rem;
-    padding-top: 3.5rem;
+    padding: var(--gridgap);
+    padding-top: 5rem;
     height: auto !important;
 
     a {
@@ -77,6 +78,8 @@
     display: flex;
     align-items: center;
     flex-direction: column;
+    // width: 100%;
+    // height: 100%;
     width: var(--cardwidth);
     height: var(--cardheight);
     background: #fff;

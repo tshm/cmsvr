@@ -5,7 +5,7 @@
 
 <main>
   <nav class={$view === 'PageView' ? 'hidden' : ''}>
-    <a href="/BookShelf">
+    <a class="title" href="/BookShelf">
       <h1>CMView</h1>
     </a>
     <ul>
@@ -20,11 +20,19 @@
 </main>
 
 <style lang="scss">
-  nav.hidden {
-    display: none;
+  nav {
+    .title {
+      margin: 0 var(--gap);
+      text-decoration: none;
+      h1 {
+        margin: 0;
+      }
+    }
+    ul {
+      margin: var(--gap);
+    }
   }
-
-  nav a {
-    text-decoration: none;
+  .hidden {
+    display: none;
   }
 </style>
