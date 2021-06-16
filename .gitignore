@@ -5,3 +5,5 @@ node_modules
 /functions
 /contents
 tmp/
+yarn-error.log
+coverage
